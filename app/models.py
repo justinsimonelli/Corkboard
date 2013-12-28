@@ -1,6 +1,8 @@
 from app import db
 
-class TODOS(db.Model):
+class Todos(db.Model):
+	__tablename__ = 'TODOS'
+	id = db.Column(db.INTEGER, primary_key = True, autoincrement = True)
 	message = db.Column(db.VARCHAR(4000))
 	latitude = db.Column(db.VARCHAR(20))
 	longitude = db.Column(db.VARCHAR(20))
