@@ -1,14 +1,11 @@
 #!flask/bin/python
 from flask import Flask, jsonify,make_response,request, render_template,json
-from flask.ext.mysql import MySQL
 import forecastio, datetime, dbUtil
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object('config')
 
-mysql = MySQL();
-mysql.init_app(app)
 
 FORECASTIO_KEY = '5481d13c75c7b5a7f56411647a4e88df'
 
