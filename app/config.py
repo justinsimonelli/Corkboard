@@ -1,0 +1,1 @@
+SQLALCHEMY_DATABASE_URI = 'mysql://root:ev3rgl0W@localhost/infodeck'
