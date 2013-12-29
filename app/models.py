@@ -9,4 +9,4 @@ class Todos(db.Model):
 	longitude = db.Column(db.VARCHAR(20))
 
 	def __repr__(self):
-		return '<ToDoItem %r>' % (self.message)
+		return "<ToDoItem %r>" % (self.message)

@@ -45,7 +45,7 @@ fieldset {
 }
 
 textarea {
-    resize: vertical;
+    resize: none;
 }
 
 .chromeframe {
@@ -159,8 +159,15 @@ nav a:hover {
    Author's custom styles
    ========================================================================== */
 
+#todo-block{
+    display:none;
+}
 
-
+#todos .item{
+    border-bottom: dashed 1px;
+    padding: 10px 0;
+    margin: 10px 0;
+}
 
 
 

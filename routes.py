@@ -1,54 +1,43 @@
 #!flask/bin/python
-from flask import Flask, jsonify,make_response,request, render_template,json
+from flask import Flask, jsonify,make_response,request, render_template,json, abort
 import forecastio, datetime, dbUtil
+from app import app, db, models
+from app.config import FORECASTIO_KEY
 
-app = Flask(__name__)
-app.url_map.strict_slashes = False
-app.config.from_object('config')
-
-
-FORECASTIO_KEY = '5481d13c75c7b5a7f56411647a4e88df'
-
-@app.route('/info-deck', methods = ['GET'])
+@app.route('/', methods = ['GET'])
 def render_home():
-    return render_template('home.html')
+    items = models.Todos.query.order_by(models.Todos.timestamp.desc()).all()
+    return render_template("home.html", todos = items)
 
-
-@app.route('/info-deck/api/v1/todos', methods = ['GET'])
+@app.route('/corkboard/api/v1/todos', methods = ['GET'])
 def get_tasks():
     return jsonify( { 'tasks': tasks } )
 
-@app.route('/info-deck/api/v1/todos', methods = ['POST'])
+@app.route('/corkboard/api/v1/todos/add/', methods = ['POST'])
 def create_task():
-    #if not request.json or not 'message' in request.json:
-        #abort(400)
-    data = [{
-        'message'   :   'this is a test!',
-        'lat'   :   '105',
-        'lng'   :   '108'
-    }];
-    jsonData = json.dumps(data);
-    dbUtil.insert_new_msg(jsonData, mysql);
-    return make_response(jsonify( { 'status': 'OK' } ), 201)
+    if ((request.json is None)):
+        abort(400)
+    data = [dict(message=request.json['message'], latitude='105', longitude='108')]
+    statusMsg = dbUtil.insert_new_msg(data)
+    if( statusMsg['status'] == "OK" ):
+        return make_response(jsonify( { 'status': statusMsg['status'] } ), 201)
+    else:
+        return make_response(jsonify( { 'status': statusMsg['status'] } ), 400)
 
-@app.route('/info-deck/api/v1/weather/<lat>/<lng>/', methods = ['GET'])
+
+@app.route('/corkboard/api/v1/weather/<lat>/<lng>/', methods = ['GET'])
 def get_weather(lat=None, lng=None):
     forecast = forecastio.load_forecast(FORECASTIO_KEY, lat, lng)
     currently = forecast.currently()
     dayInfo = {}
     for day in forecast.daily().data:
-        dayInfo.update( generateWeatherDic( day ) )
+        dayInfo.update( generate_weather_dic( day ) )
 
-    return make_response(jsonify( {
-        #order json properties alphabetically just to make things easier
-        'current': generateWeatherDic( currently ), 
-        'daily'  : dayInfo,
-        'status' : 'OK'
-        } ), 201)
+    return make_response(jsonify(dict(current=generate_weather_dic(currently), daily=dayInfo, status='OK')), 201)
 
 
-@app.route('/info-deck/api/v1/hello/')
-@app.route('/info-deck/api/v1/hello/<name>')
+@app.route('/corkboard/api/v1/hello/')
+@app.route('/corkboard/api/v1/hello/<name>')
 def hello(name=None):
     return render_template('hello.html', name=name)
 
@@ -61,7 +50,7 @@ def not_found(error):
 def server_error(error):
         return make_response(jsonify( {'error': 'Server error'} ), 500)
 
-def generateWeatherDic( object ):
+def generate_weather_dic( object ):
     dayInfo = {}
     dateSt = None
     if not (object is None):
@@ -71,7 +60,7 @@ def generateWeatherDic( object ):
         except Exception, e:
             dateSt = str(object.utime)
 
-        dayInfo[str(object.utime)] = {
+        dayInfo["data"] = {
         #order json properties alphabetically just to make things easier
                 'date' : dateSt,
                 'high' : object.temperatureMax,
@@ -93,7 +82,5 @@ def formatFloatingPoint( val, multiplier = None ):
             return ( "%0.2f" % (val) )
 
 if __name__ == '__main__':
-    app.run(
-        debug = True,
-        host='0.0.0.0')
+    app.run()
     

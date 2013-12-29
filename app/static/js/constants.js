@@ -14,7 +14,6 @@ var GIFS = [
 	'the office'
 ];
 
-var FORECAST_IO_KEY = "5481d13c75c7b5a7f56411647a4e88df",
-	FORECAST_IO_URL = "https://api.forecast.io/forecast/"+FORECAST_IO_KEY+"/",
+var WEATHER_API_URL = "/corkboard/api/v1/weather/",
 	GIPHY_PUBLIC_KEY= "dc6zaTOxFJmzC",
 	GIPHY_URL = "http://api.giphy.com/v1/gifs/search?api_key="+GIPHY_PUBLIC_KEY+"&q="

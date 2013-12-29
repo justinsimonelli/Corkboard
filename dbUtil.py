@@ -1,42 +1,30 @@
 #!flask/bin/python
 # -*- coding: utf-8 -*-
+from app import db, models
 import time, json
 
-def insert_new_msg( jsonData, mysql ):
-	if not ( jsonData is None ):
-		try:
-			cur = mysql.get_db().cursor()
-			data = json.loads(jsonData);
+def insert_new_msg( data ):
+    """
 
-			cur.execute("INSERT INTO TO_DO(MESSAGE, LATITUDE, LONGITUDE) VALUES (%s, %s, %s)",
-				( data[0]['message'] , data[0]['lat'], data[0]['lng']) )
+    @rtype : str
+    """
+    statusMsg = ""
+    if not ( data is None ):
+        try:
+            item = models.Todos(message=data[0]['message'], latitude=data[0]['latitude'], longitude=data[0]['longitude'])
+            db.session.add(item)
+            db.session.commit()
 
-			to_dos = {};
-			cur.execute("select * from TO_DO TD ORDER BY TD.TIMESTAMP DESC");
-			results = cur.fetchall();
-			for row in results:
-				itemId = row[0]; 
-				item = {
-					'id' : itemId,
-					'timestamp' : str(row[1]),
-					'message' : row[2],
-					'lat'	: row[3],
-					'lng'	: row[4]
-				}
+            statusMsg = "OK"
 
-				to_dos[itemId] = item;
+        except Exception, e:
+            raise e
 
-			return json.dumps([{
-				'status' : 'OK',
-				'data'	: to_dos
-				}]);
+        finally:
+            db.session.rollback()
 
-		except Exception, e:
-			raise e
+    else:
+        statusMsg = "ERROR"
 
-	else:
-		return make_response(jsonify( {
-			'status' : 'error',
-			'message' : 'Data provided is empty.'
-		}), 404);
+    return dict(status=statusMsg)
 

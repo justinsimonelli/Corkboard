@@ -13,8 +13,8 @@ function getWeatherInfo( location ){
 		{
 			weatherJson = JSON.parse( weather );
 			$(textObj).fadeOut(200, function(){
-				console.debug( weatherJson.current );
-				$(this).html("Right now, it's " + weatherJson.current[0].icon + ", with a temperature of ");
+				console.debug( weatherJson );
+				$(this).html("Right now, it's " + weatherJson.current.data.summary + ", with a temperature of ");
 				generateForecast(weatherJson);
 			}).fadeIn(200);
 		}
@@ -22,17 +22,16 @@ function getWeatherInfo( location ){
 	}else{
 		debug.log("fetching new weather data");
 		$.ajax({
-			url : FORECAST_IO_URL + lat + '/' + lng + '/',
+			url : WEATHER_API_URL + lat + '/' + lng + '/',
 			dataType : 'json',
-			success: function (data) { 
-				setStorageVal( 'local', 'weatherData', JSON.stringify(data) ); 
-				setCookie( 'weatherFetchedTimestamp', null, 15 );
-				weatherJson = JSON.parse( data );
-				console.debug( weatherJson );
+			success: function (data) {
+				console.debug( data );
 				$(textObj).fadeOut(200, function(){
-					$(this).html( "Right now, it's " + weatherJson.current[0] );
-					//generateForecast(data);
+					$(this).html( "Right now, it's " + data.current.data.summary );
+					generateForecast(data);
 				}).fadeIn(200);
+				setStorageVal( 'local', 'weatherData', JSON.stringify(data) );
+				setCookie( 'weatherFetchedTimestamp', null, 15 );
 			},
 			error : function (data) { errorFunction(data) }
 		});
@@ -112,3 +111,22 @@ function isBlank(str) {
 function errorFunction( data ){
 	console.debug( data );
 }
+
+(function($) {
+$.fn.serializeFormJSON = function() {
+
+   var o = {};
+   var a = this.serializeArray();
+   $.each(a, function() {
+       if (o[this.name]) {
+           if (!o[this.name].push) {
+               o[this.name] = [o[this.name]];
+           }
+           o[this.name].push(this.value || '');
+       } else {
+           o[this.name] = this.value || '';
+       }
+   });
+   return o;
+};
+})(jQuery);
