@@ -43,8 +43,7 @@ def get_weather(lat=None, lng=None):
         #order json properties alphabetically just to make things easier
         'current': generateWeatherDic( currently ), 
         'daily'  : dayInfo,
-        'status' : 'OK', 
-        'units'  : forecast.units,
+        'status' : 'OK'
         } ), 201)
 
 
