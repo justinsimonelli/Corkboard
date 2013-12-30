@@ -1,8 +1,9 @@
 #!flask/bin/python
-from flask import Flask, jsonify,make_response,request, render_template,json, abort
-import forecastio, datetime, dbUtil
-from app import app, db, models
-from app.config import FORECASTIO_KEY
+from flask import jsonify,make_response,request, render_template, abort
+import forecastio, dbUtil
+from app import app, models
+from config import FORECASTIO_KEY
+
 
 @app.route('/', methods = ['GET'])
 def render_home():
@@ -20,7 +21,18 @@ def create_task():
     data = [dict(message=request.json['message'], latitude='105', longitude='108')]
     statusMsg = dbUtil.insert_new_msg(data)
     if( statusMsg['status'] == "OK" ):
-        return make_response(jsonify( { 'status': statusMsg['status'] } ), 201)
+        result = dbUtil.get_latest_record()
+        record = result['item'][0]
+
+        recordDict = {
+            'id': record.id,
+            'timestamp': record.timestamp,
+            'message': record.message,
+            'latitude': record.latitude,
+            'longitude': record.longitude
+        }
+
+        return make_response(jsonify( { 'status': statusMsg['status'], 'record': recordDict }), 201)
     else:
         return make_response(jsonify( { 'status': statusMsg['status'] } ), 400)
 
@@ -44,7 +56,7 @@ def hello(name=None):
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify( { 'error': 'Not found' } ), 404)
+    return make_response(jsonify( { 'error': 'Not Found' } ), 404)
 
 @app.errorhandler(500)
 def server_error(error):

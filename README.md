@@ -11,3 +11,4 @@ Simple web app to serve up information
 - flask/bin/pip install flask-sqlalchemy
 - flask/bin/pip install python-mysqldb
 - flask/bin/pip install flask-mysql
+- flask/bin/pip install -U jsonpickle
